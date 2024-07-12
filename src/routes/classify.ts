@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
+import { fetchWebPage, getReadableContent } from '../utils/processing';
 
 export const classifyRoute = new Hono();
 
