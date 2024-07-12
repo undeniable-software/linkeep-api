@@ -31,7 +31,6 @@ export function getReadableContent(html: string) {
     }
 
     let data = {
-      title: readable.title || 'Untitled',
       content: readable.textContent?.trim() || 'No content available',
     };
 

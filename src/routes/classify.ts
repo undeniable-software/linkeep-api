@@ -2,13 +2,14 @@ import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import { fetchWebPage, getReadableContent } from '../utils/processing';
+import { classify } from '../utils/ai';
 
 export const classifyRoute = new Hono();
 
 const BodySchema = z.object({
   // needs https
   url: z.string().url(),
-  title: z.string().min(1, { message: 'Title cannot be empty' }),
+  title: z.string(),
   intent: z.string().optional(),
 });
 
@@ -33,19 +34,16 @@ classifyRoute.post('/', zValidator('json', BodySchema), async (c) => {
 
     const data = {
       url,
-      title,
+      title: title || 'Untitled',
       intent,
       classification,
     };
 
-    await saveLink(data);
+    //await saveLink(data);
 
     return c.json({
       success: true,
-      url,
-      title,
-      intent,
-      classification,
+      data,
     });
   } catch (error) {
     console.error('Error in classification process:', error);
@@ -65,6 +63,6 @@ classifyRoute.post('/', zValidator('json', BodySchema), async (c) => {
       }
     }
 
-    return c.json({ success: false, error: errorMessage }, statusCode);
+    // return c.json({ success: false, error: errorMessage }, statusCode);
   }
 });
