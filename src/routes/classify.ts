@@ -3,6 +3,8 @@ import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import { fetchWebPage, getReadableContent } from '../utils/processing';
 import { classify } from '../utils/ai';
+import { saveLink } from '../utils/db/queries';
+import { getAuth } from '@hono/clerk-auth';
 
 export const classifyRoute = new Hono();
 
@@ -14,6 +16,15 @@ const BodySchema = z.object({
 });
 
 classifyRoute.post('/', zValidator('json', BodySchema), async (c) => {
+  const auth = getAuth(c);
+
+  if (!auth?.userId) {
+    return c.json(
+      { message: 'You are not authorized to access this resource.' },
+      401
+    );
+  }
+
   try {
     const { url, title, intent } = await c.req.valid('json');
 
@@ -36,10 +47,10 @@ classifyRoute.post('/', zValidator('json', BodySchema), async (c) => {
       url,
       title: title || 'Untitled',
       intent,
-      classification,
+      classification: classification.label,
     };
 
-    //await saveLink(data);
+    await saveLink(data);
 
     return c.json({
       success: true,
@@ -63,6 +74,9 @@ classifyRoute.post('/', zValidator('json', BodySchema), async (c) => {
       }
     }
 
-    // return c.json({ success: false, error: errorMessage }, statusCode);
+    return c.json(
+      { success: false, error: errorMessage },
+      { status: statusCode }
+    );
   }
 });
