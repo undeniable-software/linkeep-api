@@ -1,5 +1,5 @@
 import { db } from './db';
-import { links, userLinks } from './schema';
+import { links, userLinks, categories } from './schema';
 import { sql, eq, inArray } from 'drizzle-orm';
 
 export async function saveLink(data: {
@@ -45,32 +45,39 @@ export async function saveLink(data: {
 }
 
 // for testing purposes
-export async function getAllLinksForUser() {
-  try {
-    const userLinksData = await db.select().from(userLinks);
+// export async function getAllLinksForUser() {
+//   try {
+//     const userLinksData = await db
+//       .select()
+//       .from(userLinks)
+//       .where(eq(userLinks.user_id, sql`requesting_user_id()`));
 
-    if (userLinksData.length === 0) {
-      return {
-        success: true,
-        data: [],
-      };
-    }
+//     if (userLinksData.length === 0) {
+//       return {
+//         success: true,
+//         data: [],
+//       };
+//     }
 
-    const linkIds = userLinksData
-      .map((userLink) => userLink.link_id)
-      .filter((linkId): linkId is string => linkId !== null);
+//     const linkIds = userLinksData
+//       .map((userLink) => userLink.link_id)
+//       .filter((linkId): linkId is string => linkId !== null);
 
-    const linksData = await db
-      .select()
-      .from(links)
-      .where(inArray(links.id, linkIds));
+//     const linksData = await db
+//       .select()
+//       .from(links)
+//       .where(inArray(links.id, linkIds));
 
-    return {
-      success: true,
-      data: linksData,
-    };
-  } catch (error) {
-    console.error('Error fetching links for user:', error);
-    throw new Error('Failed to fetch links for user');
-  }
+//     return {
+//       success: true,
+//       data: linksData,
+//     };
+//   } catch (error) {
+//     console.error('Error fetching links for user:', error);
+//     throw new Error('Failed to fetch links for user');
+//   }
+// }
+
+export function getUserCategories(userId: string) {
+  return db.select().from(categories).where(eq(categories.user_id, userId));
 }

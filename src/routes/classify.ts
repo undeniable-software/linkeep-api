@@ -38,7 +38,11 @@ classifyRoute.post('/', zValidator('json', BodySchema), async (c) => {
       throw new Error('Failed to extract readable content');
     }
 
-    const classification = await classify(readableContent.content, intent);
+    const classification = await classify(
+      readableContent.content,
+      intent || '',
+      auth.userId
+    );
     if (!classification) {
       throw new Error('Failed to classify content');
     }
@@ -48,6 +52,7 @@ classifyRoute.post('/', zValidator('json', BodySchema), async (c) => {
       title: title || 'Untitled',
       intent,
       classification: classification.label,
+      suggestions: classification.suggestions,
     };
 
     await saveLink(data);
