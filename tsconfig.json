@@ -5,10 +5,14 @@
     "moduleResolution": "Bundler",
     "strict": true,
     "skipLibCheck": true,
-    "types": [
-      "node"
-    ],
+    "types": ["node"],
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
-  }
+    "outDir": "./dist",
+    "esModuleInterop": true
+  },
+  "tsc-alias": {
+    "resolveFullPaths": true
+  },
+  "exclude": ["node_modules"]
 }
