@@ -28,7 +28,7 @@ app.route('/classify', classifyRoute);
 //   return c.json(links);
 // });
 
-const port = 3001;
+const port = 8080;
 console.log(`Server is running on port ${port}`);
 
 serve({
