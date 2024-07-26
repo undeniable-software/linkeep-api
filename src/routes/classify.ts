@@ -55,7 +55,7 @@ classifyRoute.post('/', zValidator('json', BodySchema), async (c) => {
       suggestions: classification.suggestions,
     };
 
-    await saveLink(data);
+    await saveLink(data, auth.userId);
 
     return c.json({
       success: true,

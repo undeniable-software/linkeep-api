@@ -2,12 +2,15 @@ import { db } from './db';
 import { links, userLinks, categories } from './schema';
 import { sql, eq, inArray } from 'drizzle-orm';
 
-export async function saveLink(data: {
-  url: string;
-  title: string;
-  intent?: string;
-  classification: string;
-}) {
+export async function saveLink(
+  data: {
+    url: string;
+    title: string;
+    intent?: string;
+    classification: string;
+  },
+  userId: string
+) {
   try {
     // Insert the link into the links table
     const insertedLink = await db
@@ -15,7 +18,7 @@ export async function saveLink(data: {
       .values({
         url: data.url,
         title: data.title,
-        user_id: sql`requesting_user_id()`,
+        user_id: userId,
       })
       .returning();
 
@@ -28,7 +31,7 @@ export async function saveLink(data: {
     // Insert the user link into the user_links table
     await db.insert(userLinks).values({
       link_id: linkId,
-      user_id: sql`requesting_user_id()`,
+      user_id: userId,
     });
 
     return {
