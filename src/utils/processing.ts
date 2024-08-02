@@ -1,7 +1,13 @@
 import { JSDOM } from 'jsdom';
 import { Readability } from '@mozilla/readability';
+import { FetchError, ContentExtractionError } from './errors';
 
-export async function fetchWebPage(url: string) {
+interface ReadableContent {
+  content: string;
+  title: string;
+}
+
+export async function fetchWebPage(url: string): Promise<string> {
   try {
     const response = await fetch(url, {
       method: 'GET',
@@ -9,34 +15,43 @@ export async function fetchWebPage(url: string) {
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new FetchError(`HTTP error! status: ${response.status}`);
     }
 
     const html = await response.text();
     return html;
   } catch (error) {
-    console.error('Error fetching web page:', error);
-    throw new Error('Failed to fetch web page');
+    console.error('Error fetching web page:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : null,
+      url,
+    });
+    throw new FetchError('Failed to fetch web page');
   }
 }
 
-export function getReadableContent(html: string) {
+export function getReadableContent(html: string): ReadableContent {
   try {
     const doc = new JSDOM(html);
     const reader = new Readability(doc.window.document);
     const readable = reader.parse();
 
     if (!readable) {
-      throw new Error('No readable content found');
+      throw new ContentExtractionError('No readable content found');
     }
 
-    let data = {
+    const data: ReadableContent = {
       content: readable.textContent?.trim() || 'No content available',
+      title: readable.title || 'No title available',
     };
 
     return data;
   } catch (error) {
-    console.error('Error parsing readable content:', error);
-    throw new Error('Failed to get readable content');
+    console.error('Error parsing readable content:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : null,
+      htmlSnippet: html.slice(0, 100), // Log a snippet of the HTML for context
+    });
+    throw new ContentExtractionError('Failed to get readable content');
   }
 }
