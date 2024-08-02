@@ -48,6 +48,9 @@ export const intents = pgTable('intents', {
 
 export const links = pgTable('links', {
   id: uuid('id').defaultRandom().primaryKey().notNull(),
+  category_id: uuid('category_id').references(() => categories.id, {
+    onDelete: 'cascade',
+  }),
   url: text('url').notNull(),
   title: text('title').notNull(),
   user_id: text('user_id')
