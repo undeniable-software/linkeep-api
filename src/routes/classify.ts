@@ -22,7 +22,7 @@ const BodySchema = z.object({
 classifyRoute.post('/', zValidator('json', BodySchema), async (c) => {
   const auth = getAuth(c);
 
-  if (!auth?.userId) {
+  if (!auth || !auth.userId) {
     return c.json(
       { message: 'You are not authorized to access this resource.' },
       401
@@ -44,8 +44,8 @@ classifyRoute.post('/', zValidator('json', BodySchema), async (c) => {
 
     const classification = await classify(
       readableContent.content,
-      intent || '',
-      auth.userId
+      auth.userId,
+      intent || ''
     );
     if (!classification) {
       throw new ClassificationError('Failed to classify content');

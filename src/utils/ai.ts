@@ -17,26 +17,12 @@ const testLabels = [
 
 async function getLabels(userId: string) {
   const labels = await getUserCategories(userId);
-  return labels.reduce(
-    (
-      acc: Record<string, string>,
-      label: {
-        id: string;
-        name: string;
-        user_id: string;
-        created_at: Date | null;
-        updated_at: Date | null;
-      }
-    ) => {
-      acc[label.name.toUpperCase()] = label.name;
-      return acc;
-    },
-    {}
-  );
+  return labels.map((label) => label.name);
 }
 
 const prompt = async (data: string, userId: string) => {
   const labels = await getLabels(userId);
+  console.log('labels', labels);
 
   return `As an advanced content classifier, your task is to categorize the given content into one of these predefined categories: ${Object.values(
     labels
@@ -63,7 +49,9 @@ Keep your suggestions concise and to the point, as they will be used as categori
 
 Content to classify: ${data}
 
-Remember, your chosen category must be one of the predefined categories provided. For the alternative suggestions, prioritize those that would be most useful for finding or categorizing the content in the future, while keeping them short and category-like.`;
+Remember, your chosen category must be one of the predefined categories provided. For the alternative suggestions, prioritize those that would be most useful for finding or categorizing the content in the future, while keeping them short and category-like.
+Again the predefined categories are: ${Object.values(labels).join(', ')}
+`;
 };
 
 const oai = createOpenAI({
