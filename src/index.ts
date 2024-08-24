@@ -3,9 +3,18 @@ import { Hono } from 'hono';
 import { classifyRoute } from './routes/classify';
 import { clerkMiddleware, getAuth } from '@hono/clerk-auth';
 import { checkStripeSubscription } from './utils/db/queries';
+import { cors } from 'hono/cors';
 
 const app = new Hono();
 app.use('*', clerkMiddleware());
+app.use(
+  '*',
+  cors({
+    origin: ['chrome-extension://lhmaiopbmgceajpnadgcddokdjfjbmap'],
+    allowHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  })
+);
 
 app.get('/', (c) => {
   const auth = getAuth(c);
