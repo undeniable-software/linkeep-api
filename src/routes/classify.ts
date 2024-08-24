@@ -37,7 +37,7 @@ classifyRoute.post('/', zValidator('json', BodySchema), async (c) => {
       throw new FetchError('Failed to fetch web page');
     }
 
-    const readableContent = getReadableContent(rawHTML);
+    const readableContent = getReadableContent(rawHTML, url);
     if (!readableContent || !readableContent.content) {
       throw new ContentExtractionError('Failed to extract readable content');
     }

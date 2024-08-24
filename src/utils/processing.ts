@@ -1,6 +1,7 @@
 import { JSDOM } from 'jsdom';
 import { Readability } from '@mozilla/readability';
 import { FetchError, ContentExtractionError } from './errors';
+import { URL } from 'url';
 
 interface ReadableContent {
   content: string;
@@ -31,7 +32,7 @@ export async function fetchWebPage(url: string): Promise<string> {
   }
 }
 
-export function getReadableContent(html: string): ReadableContent {
+export function getReadableContent(html: string, url: string): ReadableContent {
   try {
     const doc = new JSDOM(html);
     const reader = new Readability(doc.window.document);
@@ -41,10 +42,12 @@ export function getReadableContent(html: string): ReadableContent {
       throw new ContentExtractionError('No readable content found');
     }
 
+    const siteName = new URL(url).hostname;
+
     const data: ReadableContent = {
       content: readable.textContent?.trim() || 'No content available',
       title: readable.title || 'No title available',
-      siteName: readable.siteName || 'No site name available',
+      siteName: siteName || 'No site name available',
     };
 
     return data;
