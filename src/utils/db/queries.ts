@@ -8,6 +8,7 @@ interface LinkData {
   title: string;
   intent?: string;
   classification: string;
+  siteName: string;
 }
 
 export async function saveLink(data: LinkData, userId: string) {
@@ -22,6 +23,7 @@ export async function saveLink(data: LinkData, userId: string) {
         title: data.title,
         user_id: userId,
         category_id: categoryId,
+        siteName: data.siteName,
       })
       .returning();
 

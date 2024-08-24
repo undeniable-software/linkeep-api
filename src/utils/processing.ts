@@ -5,6 +5,7 @@ import { FetchError, ContentExtractionError } from './errors';
 interface ReadableContent {
   content: string;
   title: string;
+  siteName: string;
 }
 
 export async function fetchWebPage(url: string): Promise<string> {
@@ -43,6 +44,7 @@ export function getReadableContent(html: string): ReadableContent {
     const data: ReadableContent = {
       content: readable.textContent?.trim() || 'No content available',
       title: readable.title || 'No title available',
+      siteName: readable.siteName || 'No site name available',
     };
 
     return data;

@@ -50,6 +50,7 @@ export const intents = pgTable('intents', {
 export const links = pgTable('links', {
   id: uuid('id').defaultRandom().primaryKey().notNull(),
   url: text('url').notNull(),
+  siteName: text('site_name').notNull(),
   title: text('title').notNull(),
   user_id: text('user_id')
     .notNull()

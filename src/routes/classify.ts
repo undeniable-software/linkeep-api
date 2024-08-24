@@ -57,6 +57,7 @@ classifyRoute.post('/', zValidator('json', BodySchema), async (c) => {
       intent,
       classification: classification.label,
       suggestions: classification.suggestions,
+      siteName: readableContent.siteName,
     };
 
     await saveLink(data, auth.userId);
