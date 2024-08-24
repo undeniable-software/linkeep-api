@@ -30,7 +30,7 @@ app.get('/', (c) => {
 
 app.route('/classify', classifyRoute);
 
-app.post('/subcriptionCheck', async (c) => {
+app.post('/subscriptionCheck', async (c) => {
   const auth = getAuth(c);
 
   if (!auth || !auth.userId) {
