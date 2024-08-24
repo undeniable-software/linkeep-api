@@ -1,5 +1,5 @@
 import { db } from './db';
-import { links, userLinks, categories } from './schema';
+import { links, userLinks, categories, stripeCustomers } from './schema';
 import { sql, eq, and } from 'drizzle-orm';
 import { DatabaseError, NotFoundError } from '../errors';
 
@@ -99,5 +99,23 @@ export async function getUserCategories(userId: string) {
       userId,
     });
     throw new DatabaseError('Failed to fetch user categories');
+  }
+}
+
+export async function checkStripeSubscription(userId: string) {
+  const user = await db
+    .select()
+    .from(stripeCustomers)
+    .where(eq(stripeCustomers.user_id, userId));
+
+  if (user.length === 0) {
+    return false;
+  }
+
+  switch (user[0].current_sub_status) {
+    case 'active':
+      return true;
+    case 'inactive':
+      return false;
   }
 }

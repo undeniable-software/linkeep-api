@@ -1,8 +1,8 @@
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import { classifyRoute } from './routes/classify';
-// import { getAllLinksForUser } from './utils/db/queries';
 import { clerkMiddleware, getAuth } from '@hono/clerk-auth';
+import { checkStripeSubscription } from './utils/db/queries';
 
 const app = new Hono();
 app.use('*', clerkMiddleware());
@@ -20,6 +20,22 @@ app.get('/', (c) => {
 });
 
 app.route('/classify', classifyRoute);
+
+app.post('/subcriptionCheck', async (c) => {
+  const auth = getAuth(c);
+
+  if (!auth || !auth.userId) {
+    return c.json(
+      { message: 'You are not authorized to access this resource.' },
+      401
+    );
+  }
+
+  const userId = auth.userId;
+  const isSubscribed = await checkStripeSubscription(userId);
+
+  return c.json({ isSubscribed });
+});
 
 // app.post('/links', async (c) => {
 //   const { user_id } = await c.req.json();
