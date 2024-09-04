@@ -10,7 +10,10 @@ app.use(
   '*',
   clerkMiddleware(),
   cors({
-    origin: ['chrome-extension://lhmaiopbmgceajpnadgcddokdjfjbmap'],
+    origin: [
+      'chrome-extension://lhmaiopbmgceajpnadgcddokdjfjbmap',
+      'chrome-extension://lkhfmfeekcpejadphjpajcaahakealon',
+    ],
     allowHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
   })
