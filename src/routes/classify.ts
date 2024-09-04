@@ -1,4 +1,3 @@
-import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import { fetchWebPage, getReadableContent } from '../utils/processing';
@@ -10,8 +9,7 @@ import {
   ContentExtractionError,
   ClassificationError,
 } from '../utils/errors';
-
-export const classifyRoute = new Hono();
+import { app } from '../index';
 
 const BodySchema = z.object({
   // needs https
@@ -19,7 +17,7 @@ const BodySchema = z.object({
   intent: z.string().optional(),
 });
 
-classifyRoute.post('/', zValidator('json', BodySchema), async (c) => {
+app.post('/classify', zValidator('json', BodySchema), async (c) => {
   const auth = getAuth(c);
 
   if (!auth || !auth.userId) {
