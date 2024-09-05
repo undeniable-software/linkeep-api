@@ -13,6 +13,7 @@ import {
   ContentExtractionError,
   ClassificationError,
 } from './utils/errors';
+import { posthogClient } from './utils/analytics';
 import { sign } from 'hono/jwt';
 import dotenv from 'dotenv';
 
@@ -143,6 +144,12 @@ app.post('/classify', zValidator('json', BodySchema), async (c) => {
 
     await saveLink(data, auth.userId);
 
+    // Track successful link saving
+    posthogClient.capture({
+      distinctId: 'global',
+      event: 'link-saved',
+    });
+
     return c.json({
       success: true,
       data,
@@ -188,4 +195,16 @@ console.log(`Server is running on port ${port}`);
 serve({
   fetch: app.fetch,
   port,
+});
+
+process.on('SIGINT', async () => {
+  console.log('SIGINT signal received: closing HTTP server');
+  await posthogClient.shutdown();
+  process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
+  console.log('SIGTERM signal received: closing HTTP server');
+  await posthogClient.shutdown();
+  process.exit(0);
 });
