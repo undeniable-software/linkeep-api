@@ -13,6 +13,10 @@ import {
   ContentExtractionError,
   ClassificationError,
 } from './utils/errors';
+import { sign } from 'hono/jwt';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = new Hono();
 
@@ -56,6 +60,39 @@ app.post('/subscription-check', async (c) => {
   const isSubscribed = await checkStripeSubscription(userId);
 
   return c.json({ isSubscribed });
+});
+
+app.get('/get-subscription-token', async (c) => {
+  const auth = getAuth(c);
+
+  if (!auth || !auth.userId) {
+    return c.json(
+      { message: 'You are not authorized to access this resource.' },
+      401
+    );
+  }
+
+  try {
+    const userId = auth.userId;
+    const isSubscribed = await checkStripeSubscription(userId);
+
+    const token = await sign(
+      {
+        userId: userId,
+        subscriptionStatus: isSubscribed,
+        exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60, // Expires in 24 hours
+      },
+      process.env.JWT_SECRET as string
+    );
+
+    return c.json({ token });
+  } catch (error) {
+    console.error('Error generating subscription token:', error);
+    return c.json(
+      { message: 'An error occurred while generating the subscription token.' },
+      500
+    );
+  }
 });
 
 const BodySchema = z.object({
