@@ -4,12 +4,12 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export const posthogClient = new PostHog(process.env.POSTHOG_API_KEY!, {
-  host: 'https://us.i.posthog.com',
+  host: 'https://www.mylinkeep.com/ingest',
 });
 
-function trackLinkSaving() {
+function trackLinkSaving(userId: string) {
   posthogClient.capture({
-    distinctId: 'global',
+    distinctId: userId,
     event: 'link-saved',
   });
 }

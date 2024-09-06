@@ -146,7 +146,7 @@ app.post('/classify', zValidator('json', BodySchema), async (c) => {
 
     // Track successful link saving
     posthogClient.capture({
-      distinctId: 'global',
+      distinctId: auth.userId,
       event: 'link-saved',
     });
 
