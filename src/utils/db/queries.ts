@@ -27,8 +27,6 @@ export async function saveLink(data: LinkData, userId: string) {
       })
       .returning();
 
-    console.log('Inserted link:', insertedLink);
-
     if (insertedLink.length === 0) {
       throw new DatabaseError('Failed to insert link');
     }

@@ -142,6 +142,8 @@ app.post('/classify', zValidator('json', BodySchema), async (c) => {
       siteName: readableContent.siteName,
     };
 
+    console.log('USER ID', auth.userId);
+
     await saveLink(data, auth.userId);
 
     // Track successful link saving
