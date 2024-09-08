@@ -27,6 +27,8 @@ export async function saveLink(data: LinkData, userId: string) {
       })
       .returning();
 
+    console.log('Inserted link:', insertedLink);
+
     if (insertedLink.length === 0) {
       throw new DatabaseError('Failed to insert link');
     }
@@ -53,6 +55,16 @@ export async function saveLink(data: LinkData, userId: string) {
       data,
       userId,
     });
+
+    // Log specific error details if available
+    if (error instanceof DatabaseError) {
+      console.error('DatabaseError details:', error);
+    } else if (error instanceof NotFoundError) {
+      console.error('NotFoundError details:', error);
+    } else {
+      console.error('Unknown error details:', error);
+    }
+
     throw new DatabaseError('Failed to save link');
   }
 }
