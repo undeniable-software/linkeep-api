@@ -85,6 +85,8 @@ async function getCategoryId(
       );
     }
 
+    console.log('Category:', category);
+
     return category[0].id;
   } catch (error) {
     console.error('Error fetching category ID:', {
