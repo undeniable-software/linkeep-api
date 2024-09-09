@@ -13,9 +13,11 @@ interface LinkData {
 
 export async function saveLink(data: LinkData, userId: string) {
   try {
-    const categoryId = await getCategoryId(data.classification, userId);
+    console.log(`Attempting to save link for user ${userId}:`, data);
 
-    // Insert the link into the links table
+    const categoryId = await getCategoryId(data.classification, userId);
+    console.log(`Retrieved category ID: ${categoryId}`);
+
     const insertedLink = await db
       .insert(links)
       .values({
@@ -32,12 +34,7 @@ export async function saveLink(data: LinkData, userId: string) {
     }
 
     const linkId = insertedLink[0].id;
-
-    // Insert the user link into the user_links table
-    // await db.insert(userLinks).values({
-    //   link_id: linkId,
-    //   user_id: userId,
-    // });
+    console.log(`Link inserted successfully with ID: ${linkId}`);
 
     return {
       success: true,
@@ -48,19 +45,14 @@ export async function saveLink(data: LinkData, userId: string) {
     };
   } catch (error) {
     console.error('Error saving link:', {
-      message: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : null,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : 'No stack trace',
       data,
       userId,
     });
 
-    // Log specific error details if available
-    if (error instanceof DatabaseError) {
-      console.error('DatabaseError details:', error);
-    } else if (error instanceof NotFoundError) {
-      console.error('NotFoundError details:', error);
-    } else {
-      console.error('Unknown error details:', error);
+    if (error instanceof DatabaseError || error instanceof NotFoundError) {
+      console.error(`${error.constructor.name} details:`, error);
     }
 
     throw new DatabaseError('Failed to save link');
@@ -72,6 +64,10 @@ async function getCategoryId(
   userId: string
 ): Promise<string> {
   try {
+    console.log(
+      `Fetching category ID for '${categoryName}' and user '${userId}'`
+    );
+
     const category = await db
       .select()
       .from(categories)
@@ -85,13 +81,13 @@ async function getCategoryId(
       );
     }
 
-    console.log('Category:', category);
+    console.log(`Category found:`, category[0]);
 
     return category[0].id;
   } catch (error) {
     console.error('Error fetching category ID:', {
-      message: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : null,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : 'No stack trace',
       categoryName,
       userId,
     });
@@ -101,15 +97,20 @@ async function getCategoryId(
 
 export async function getUserCategories(userId: string) {
   try {
+    console.log(`Fetching categories for user '${userId}'`);
+
     const labels = await db
       .select()
       .from(categories)
       .where(eq(categories.user_id, userId));
+
+    console.log(`Retrieved ${labels.length} categories for user '${userId}'`);
+
     return labels;
   } catch (error) {
     console.error('Error fetching user categories:', {
-      message: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : null,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : 'No stack trace',
       userId,
     });
     throw new DatabaseError('Failed to fetch user categories');
@@ -117,16 +118,24 @@ export async function getUserCategories(userId: string) {
 }
 
 export async function checkStripeSubscription(userId: string) {
+  console.log(`Checking Stripe subscription for user '${userId}'`);
+
   const user = await db
     .select()
     .from(stripeCustomers)
     .where(eq(stripeCustomers.user_id, userId));
 
   if (user.length === 0) {
+    console.log(`No Stripe customer found for user '${userId}'`);
     return false;
   }
 
-  switch (user[0].current_sub_status) {
+  const subscriptionStatus = user[0].current_sub_status;
+  console.log(
+    `Subscription status for user '${userId}': ${subscriptionStatus}`
+  );
+
+  switch (subscriptionStatus) {
     case 'active':
       return true;
     case 'inactive':
